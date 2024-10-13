@@ -20,6 +20,9 @@ type WalletOperation struct {
 
 func main() {
 	var err error
+	// изменить параметры подключения
+	// не могу сейчас пофиксить под докер, так как wsl умер окончательно и нужно переустановить систему (бесконечно долго устанавливает убунту, не пишет лог)
+	// до этого код запускался, но не подключался к бд, пока я не сделал глупость, от чего весь wsl поломался
 	connStr := "postgres://postgres:@localhost:5432/wallet_db?sslmode=disable"
 	db, err = sql.Open("postgres", connStr)
 	if err != nil {
@@ -107,12 +110,11 @@ func getWalletBalance(w http.ResponseWriter, r *http.Request) {
 	if err == sql.ErrNoRows {
 		http.Error(w, "Wallet not found", http.StatusNotFound)
 		return
-	 }
-	//else if err != nil {
-	// 	http.Error(w, "Failed to retrieve balance", http.StatusInternalServerError)
-	// 	return
-	// }
+	 } else if err != nil {
+		http.Error(w, "Failed to retrieve balance", http.StatusInternalServerError)
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Wallet balance: %d, err: %d", balance, err.Error())
+	fmt.Fprintf(w, "Wallet balance: %d", balance)
 }
